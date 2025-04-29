@@ -1,0 +1,106 @@
+const express = require('express')
+const sql = require('mssql')
+const bodyParser = require('body-parser')
+const cors = require('cors')
+require('dotenv').config()
+
+const app = express()
+app.use(cors())
+app.use(bodyParser.json())
+
+const config = {
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  server: process.env.DB_SERVER,
+  database: process.env.DB_DATABASE,
+  options: {
+    encrypt: false,
+    trustServerCertificate: true,
+  },
+}
+
+// Test DB Connection
+sql.connect(config)
+  .then(pool => {
+    console.log('Connected to MSSQL')
+    return pool
+  })
+  .catch(err => console.error('DB Connection Failed:', err))
+
+// POST Leave Request
+app.post('/api/leave', async (req, res) => {
+  const { employeeId, leaveType, reason, startDate, endDate } = req.body
+  try {
+    const pool = await sql.connect(config)
+    const result = await pool.request()
+      .input('employeeId', sql.Int, employeeId)
+      .input('leaveType', sql.VarChar, leaveType)
+      .input('reason', sql.Text, reason)
+      .input('startDate', sql.Date, startDate)
+      .input('endDate', sql.Date, endDate)
+      .query(`
+        INSERT INTO LeaveRequests (employeeId, leaveType, reason, startDate, endDate, status)
+        VALUES (@employeeId, @leaveType, @reason, @startDate, @endDate, 'pending')
+      `)
+    res.status(201).send({ message: 'Leave request submitted' })
+  } catch (err) {
+    res.status(500).send({ error: err.message })
+  }
+})
+
+// GET All Pending Requests
+app.get('/api/leave/pending', async (req, res) => {
+  try {
+    const pool = await sql.connect(config)
+    const result = await pool.request().query(`
+      SELECT L.id, E.name, E.department, L.leaveType, L.reason, L.startDate, L.endDate
+      FROM LeaveRequests L
+      JOIN Employees E ON L.employeeId = E.id
+      WHERE L.status = 'pending'
+    `)
+    res.json(result.recordset)
+  } catch (err) {
+    res.status(500).send({ error: err.message })
+  }
+})
+
+// Approve or Reject Leave
+app.post('/api/leave/:id/:action', async (req, res) => {
+  const { id, action } = req.params
+  const { comment } = req.body
+  const status = action === 'approve' ? 'approved' : 'rejected'
+  try {
+    const pool = await sql.connect(config)
+    await pool.request()
+      .input('id', sql.Int, id)
+      .input('status', sql.VarChar, status)
+      .input('comment', sql.Text, comment)
+      .query(`
+        UPDATE LeaveRequests SET status = @status, reviewerComment = @comment
+        WHERE id = @id
+      `)
+    res.send({ message: `Leave request ${status}` })
+  } catch (err) {
+    res.status(500).send({ error: err.message })
+  }
+})
+
+// User Leave Status List
+app.get('/api/leave/user/:id', async (req, res) => {
+  const { id } = req.params
+  try {
+    const pool = await sql.connect(config)
+    const result = await pool.request()
+      .input('id', sql.Int, id)
+      .query(`
+        SELECT * FROM LeaveRequests
+        WHERE employeeId = @id
+      `)
+    res.json(result.recordset)
+  } catch (err) {
+    res.status(500).send({ error: err.message })
+  }
+})
+
+const PORT = process.env.PORT || 5000
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
