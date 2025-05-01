@@ -18,17 +18,34 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [role, setRole] = useState<"user" | "admin">("user")
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    // In a real application, you would validate credentials here
-    // For demo purposes, we're just checking the email to determine role
-    if (email.includes("admin")) {
-      router.push("/dashboard/admin")
-    } else {
-      router.push("/dashboard/user")
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    try {
+      const response = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Invalid credentials');
+      }
+  
+      const user = await response.json();
+      
+      // Redirect based on role
+      if (user.role === 'admin') {
+        router.push('/dashboard/admin');
+      } else {
+        router.push('/dashboard/user');
+      }
+    } catch (err) {
+      alert('Login failed: ' + err.message);
     }
-  }
+  };
 
   // For demo purposes, quick login buttons
   const loginAsUser = () => {

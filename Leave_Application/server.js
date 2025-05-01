@@ -27,6 +27,29 @@ sql.connect(config)
   })
   .catch(err => console.error('DB Connection Failed:', err))
 
+// POST /api/login
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool.request()
+      .input('email', sql.VarChar, email)
+      .input('password', sql.VarChar, password) // Note: hash passwords in real apps!
+      .query(`SELECT id, name, role FROM Employees WHERE email = @email AND password = @password`);
+
+    if (result.recordset.length === 0) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const user = result.recordset[0];
+    res.json(user); // send back user info
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // POST Leave Request
 app.post('/api/leave', async (req, res) => {
   const { employeeId, leaveType, reason, startDate, endDate } = req.body
