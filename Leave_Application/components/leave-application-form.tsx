@@ -20,16 +20,36 @@ export default function LeaveApplicationForm() {
   const [leaveType, setLeaveType] = useState("")
   const [reason, setReason] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle form submission
-    console.log({ startDate, endDate, leaveType, reason })
-    // Reset form
+  // Submit Leave Request to backend
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+
+  const response = await fetch("http://localhost:5000/api/leave", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      employeeId: 1, // Replace with logged-in user ID
+      leaveType,
+      reason,
+      startDate,
+      endDate,
+    }),
+  })
+
+  const data = await response.json()
+  if (response.ok) {
+    alert("Leave request submitted successfully.")
     setStartDate(undefined)
     setEndDate(undefined)
     setLeaveType("")
     setReason("")
+  } else {
+    alert("Failed to submit: " + data.error)
   }
+}
+
 
   return (
     <Card>

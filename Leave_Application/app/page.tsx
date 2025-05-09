@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,12 +13,20 @@ import { useTheme } from "next-themes"
 export default function LoginPage() {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
+  
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [role, setRole] = useState<"user" | "admin">("user")
+  
+  // Mounted state to prevent hydration error
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
   
     try {
       const response = await fetch('http://localhost:5000/api/login', {
@@ -28,38 +35,23 @@ export default function LoginPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
-      });
+      })
   
       if (!response.ok) {
-        throw new Error('Invalid credentials');
+        throw new Error('Invalid credentials')
       }
   
-      const user = await response.json();
+      const user = await response.json()
       
       // Redirect based on role
       if (user.role === 'admin') {
-        router.push('/dashboard/admin');
+        router.push('/dashboard/admin')
       } else {
-        router.push('/dashboard/user');
+        router.push('/dashboard/user')
       }
     } catch (err) {
-      alert('Login failed: ' + err.message);
+      alert('Login failed: ' + err.message)
     }
-  };
-
-  // For demo purposes, quick login buttons
-  const loginAsUser = () => {
-    setEmail("user@example.com")
-    setPassword("password")
-    setRole("user")
-    router.push("/dashboard/user")
-  }
-
-  const loginAsAdmin = () => {
-    setEmail("admin@example.com")
-    setPassword("password")
-    setRole("admin")
-    router.push("/dashboard/admin")
   }
 
   return (
@@ -70,12 +62,17 @@ export default function LoginPage() {
             <CalendarDays className="h-5 w-5 text-emerald-500" />
             <span>LeaveFlow</span>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            <span className="sr-only">Toggle theme</span>
-          </Button>
+          
+          {/* Only render the theme toggle button after the component is mounted */}
+          {mounted && (
+            <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+          )}
         </div>
       </header>
+      
       <main className="flex-1 container py-6 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader className="bg-emerald-50 dark:bg-emerald-950/30 rounded-t-lg">
@@ -118,16 +115,6 @@ export default function LoginPage() {
               >
                 Sign In
               </Button>
-
-              <div className="text-center text-sm text-muted-foreground">For demo purposes:</div>
-              <div className="flex gap-2 w-full">
-                <Button type="button" variant="outline" className="flex-1" onClick={loginAsUser}>
-                  Login as User
-                </Button>
-                <Button type="button" variant="outline" className="flex-1" onClick={loginAsAdmin}>
-                  Login as Admin
-                </Button>
-              </div>
             </CardFooter>
           </form>
         </Card>

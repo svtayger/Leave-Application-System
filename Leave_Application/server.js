@@ -8,6 +8,7 @@ const app = express()
 app.use(cors())
 app.use(bodyParser.json())
 
+
 const config = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -108,22 +109,30 @@ app.post('/api/leave/:id/:action', async (req, res) => {
   }
 })
 
-// User Leave Status List
-app.get('/api/leave/user/:id', async (req, res) => {
-  const { id } = req.params
-  try {
-    const pool = await sql.connect(config)
-    const result = await pool.request()
-      .input('id', sql.Int, id)
-      .query(`
-        SELECT * FROM LeaveRequests
-        WHERE employeeId = @id
-      `)
-    res.json(result.recordset)
-  } catch (err) {
-    res.status(500).send({ error: err.message })
-  }
-})
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+
+// GET Leave Requests by User ID
+app.get('/api/leave/user/:id', async (req, res) => {
+  const employeeId = req.params.id;
+
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool.request()
+      .input('employeeId', sql.Int, employeeId)
+      .query(`
+        SELECT id, leaveType, reason, startDate, endDate, status 
+        FROM LeaveRequests 
+        WHERE employeeId = @employeeId
+        ORDER BY startDate DESC
+      `);
+
+    res.json(result.recordset);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+

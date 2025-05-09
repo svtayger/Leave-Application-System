@@ -1,14 +1,16 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle, Clock, XCircle } from "lucide-react"
+import axios from "axios"
 
 type LeaveStatus = "pending" | "approved" | "rejected"
 
 interface LeaveRequest {
-  id: string
+  id: number
   type: string
   startDate: string
   endDate: string
@@ -17,75 +19,55 @@ interface LeaveRequest {
   reason: string
 }
 
-const leaveRequests: LeaveRequest[] = [
-  {
-    id: "1",
-    type: "Annual Leave",
-    startDate: "May 15, 2023",
-    endDate: "May 20, 2023",
-    days: 5,
-    status: "approved",
-    reason: "Family vacation",
-  },
-  {
-    id: "2",
-    type: "Sick Leave",
-    startDate: "June 5, 2023",
-    endDate: "June 6, 2023",
-    days: 2,
-    status: "pending",
-    reason: "Doctor's appointment",
-  },
-  {
-    id: "3",
-    type: "Personal Leave",
-    startDate: "July 10, 2023",
-    endDate: "July 10, 2023",
-    days: 1,
-    status: "rejected",
-    reason: "Personal matters",
-  },
-  {
-    id: "4",
-    type: "Annual Leave",
-    startDate: "August 1, 2023",
-    endDate: "August 5, 2023",
-    days: 5,
-    status: "pending",
-    reason: "Summer break",
-  },
-]
-
 export default function LeaveStatusList() {
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([])
+  const employeeId = 1 // TODO: Replace with logged-in user's ID from context or props
+
+  useEffect(() => {
+    axios.get(`http://localhost:5000/api/leave/user/${employeeId}`)
+      .then(res => {
+        const requests = res.data.map((req: any) => {
+          const days =
+            (new Date(req.endDate).getTime() - new Date(req.startDate).getTime()) /
+              (1000 * 60 * 60 * 24) + 1
+
+          return {
+            id: req.id,
+            type: req.leaveType,
+            startDate: new Date(req.startDate).toDateString(),
+            endDate: new Date(req.endDate).toDateString(),
+            days,
+            status: req.status,
+            reason: req.reason,
+          }
+        })
+        setLeaveRequests(requests)
+      })
+      .catch(err => {
+        console.error("Failed to load leave requests:", err)
+      })
+  }, [])
+
   const getStatusBadge = (status: LeaveStatus) => {
     switch (status) {
       case "pending":
         return (
-          <Badge
-            variant="outline"
-            className="flex items-center gap-1 text-amber-500 border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800"
-          >
-            <Clock className="h-3 w-3" />
+          <Badge variant="outline" className="text-amber-500 bg-amber-50 dark:bg-amber-950/30">
+            <Clock className="h-3 w-3 mr-1" />
             Pending
           </Badge>
         )
       case "approved":
         return (
-          <Badge
-            variant="outline"
-            className="flex items-center gap-1 text-emerald-500 border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-800"
-          >
-            <CheckCircle className="h-3 w-3" />
+          <Badge variant="outline" className="text-emerald-500 bg-emerald-50 dark:bg-emerald-950/30">
+            <CheckCircle className="h-3 w-3 mr-1" />
             Approved
           </Badge>
         )
       case "rejected":
         return (
-          <Badge
-            variant="outline"
-            className="flex items-center gap-1 text-red-500 border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-800"
-          >
-            <XCircle className="h-3 w-3" />
+          <Badge variant="outline" className="text-red-500 bg-red-50 dark:bg-red-950/30">
+            <XCircle className="h-3 w-3 mr-1" />
             Rejected
           </Badge>
         )
@@ -114,16 +96,8 @@ export default function LeaveStatusList() {
               <p className="text-sm text-muted-foreground mb-2">{request.reason}</p>
               {request.status === "pending" && (
                 <div className="flex gap-2 mt-2">
-                  <Button variant="outline" size="sm" className="text-xs">
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
-                  >
-                    Cancel
-                  </Button>
+                  <Button variant="outline" size="sm" className="text-xs">Edit</Button>
+                  <Button variant="outline" size="sm" className="text-xs text-red-500">Cancel</Button>
                 </div>
               )}
             </div>
