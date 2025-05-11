@@ -49,16 +49,13 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
                   Dashboard
                 </Button>
                 <Button variant="ghost" onClick={() => router.push("/dashboard/admin/reports")}>
-                  Reports
+                  Create New User
                 </Button>
               </>
             ) : (
               <>
                 <Button variant="ghost" onClick={() => router.push("/dashboard/user")}>
                   Dashboard
-                </Button>
-                <Button variant="ghost" onClick={() => router.push("/dashboard/user/profile")}>
-                  Profile
                 </Button>
               </>
             )}

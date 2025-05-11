@@ -148,5 +148,52 @@ app.get("/api/leave/pending", async (req, res) => {
   }
 })
 
+// GET /api/profile/:id
+app.get('/api/profile/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool.request()
+      .input('id', sql.Int, id)
+      .query(`SELECT name, email, phone FROM Employees WHERE id = @id`);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(result.recordset[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/users - Create new user
+app.post('/api/users', async (req, res) => {
+  const { name, email, password, role } = req.body;
+
+  if (!name || !email || !password || !role) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  try {
+    const pool = await sql.connect(config);
+    await pool.request()
+      .input('name', sql.VarChar, name)
+      .input('email', sql.VarChar, email)
+      .input('password', sql.VarChar, password) // In production, hash this
+      .input('role', sql.VarChar, role)
+      .query(`
+        INSERT INTO Employees (name, email, password, role)
+        VALUES (@name, @email, @password, @role)
+      `);
+
+    res.status(201).json({ message: "User created successfully" });
+  } catch (err) {
+    console.error("Error creating user:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 
