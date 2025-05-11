@@ -8,7 +8,6 @@ const app = express()
 app.use(cors())
 app.use(bodyParser.json())
 
-
 const config = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -77,7 +76,7 @@ app.get('/api/leave/pending', async (req, res) => {
   try {
     const pool = await sql.connect(config)
     const result = await pool.request().query(`
-      SELECT L.id, E.name, E.department, L.leaveType, L.reason, L.startDate, L.endDate
+      SELECT L.id, E.name, L.leaveType, L.reason, L.startDate, L.endDate
       FROM LeaveRequests L
       JOIN Employees E ON L.employeeId = E.id
       WHERE L.status = 'pending'
@@ -133,6 +132,21 @@ app.get('/api/leave/user/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+app.get("/api/leave/pending", async (req, res) => {
+  try {
+    const result = await pool.request().query(`
+      SELECT L.id, L.employeeId, L.leaveType, L.reason, L.startDate, L.endDate, L.status, E.name
+      FROM LeaveRequests L
+      JOIN Employees E ON L.employeeId = E.id
+      WHERE L.status = 'pending'
+    `)
+    res.json(result.recordset)
+  } catch (err) {
+    console.error("Error fetching pending leave requests:", err)
+    res.status(500).json({ error: "Internal server error" })
+  }
+})
 
 
 
