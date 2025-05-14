@@ -2,16 +2,14 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import DashboardLayout from "@/components/dashboard-layout"
-import LeaveApprovalList from "@/components/leave-approval-list"
+import LeaveView from "@/components/leave-view"
 
-export default function AdminDashboard() {
+export default function HRDashboardPage() {
   return (
-    <DashboardLayout userRole="admin">
+    <DashboardLayout userRole="HR">
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Manager Dashboard</h1>
-
-
-        <LeaveApprovalList />
+        <h1 className="text-2xl font-bold">HR Dashboard</h1>
+        <LeaveView />
       </div>
     </DashboardLayout>
   )

@@ -46,8 +46,10 @@ export default function LoginPage() {
       // Redirect based on role
       if (user.role === 'admin') {
         router.push('/dashboard/admin')
-      } else {
+      } else if(user.role === 'user') {
         router.push('/dashboard/user')
+      } else {
+        router.push('/dashboard/HR-View')
       }
     } catch (err) {
       alert('Login failed: ' + err.message)

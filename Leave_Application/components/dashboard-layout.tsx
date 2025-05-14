@@ -9,7 +9,7 @@ import { useTheme } from "next-themes"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
-  userRole: "user" | "admin"
+  userRole: "user" | "admin" | "HR" 
 }
 
 export default function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
@@ -32,7 +32,13 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
                 Admin
               </span>
             )}
+            {userRole === "HR" && (
+              <span className="ml-2 text-xs bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 px-2 py-0.5 rounded-full">
+                HR
+              </span>
+            )}
           </div>
+
           <nav className="flex items-center gap-4">
             <Button
               variant="ghost"
@@ -43,7 +49,8 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
               {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               <span className="sr-only">Toggle theme</span>
             </Button>
-            {userRole === "admin" ? (
+
+            {userRole === "admin" && (
               <>
                 <Button variant="ghost" onClick={() => router.push("/dashboard/admin")}>
                   Dashboard
@@ -52,19 +59,27 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
                   Create New User
                 </Button>
               </>
-            ) : (
-              <>
-                <Button variant="ghost" onClick={() => router.push("/dashboard/user")}>
-                  Dashboard
-                </Button>
-              </>
             )}
+
+            {userRole === "HR" && (
+              <Button variant="ghost" onClick={() => router.push("/dashboard/HR-View")}>
+                HR Dashboard
+              </Button>
+            )}
+
+            {userRole === "user" && (
+              <Button variant="ghost" onClick={() => router.push("/dashboard/user")}>
+                Dashboard
+              </Button>
+            )}
+
             <Button variant="outline" onClick={handleLogout}>
               Logout
             </Button>
           </nav>
         </div>
       </header>
+
       <main className="flex-1 container py-6">{children}</main>
     </div>
   )
