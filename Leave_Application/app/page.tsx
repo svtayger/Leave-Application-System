@@ -44,8 +44,8 @@ export default function LoginPage() {
       const user = await response.json()
       
       // Redirect based on role
-      if (user.role === 'admin') {
-        router.push('/dashboard/admin')
+      if (user.role === 'manager') {
+        router.push('/dashboard/manager')
       } else if(user.role === 'user') {
         router.push('/dashboard/user')
       } else {

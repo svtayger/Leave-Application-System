@@ -9,7 +9,7 @@ import { useTheme } from "next-themes"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
-  userRole: "user" | "admin" | "HR" 
+  userRole: "user" | "manager" | "HR" 
 }
 
 export default function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
@@ -27,9 +27,9 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
           <div className="flex items-center gap-2 font-semibold">
             <CalendarDays className="h-5 w-5 text-emerald-500" />
             <span>LeaveFlow</span>
-            {userRole === "admin" && (
+            {userRole === "manager" && (
               <span className="ml-2 text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 px-2 py-0.5 rounded-full">
-                Admin
+                Manager
               </span>
             )}
             {userRole === "HR" && (
@@ -50,32 +50,22 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
               <span className="sr-only">Toggle theme</span>
             </Button>
 
-            {userRole === "admin" && (
+            {userRole === "manager" && (
               <>
-                <Button variant="ghost" onClick={() => router.push("/dashboard/admin")}>
-                  Dashboard
-                </Button>
-                <Button variant="ghost" onClick={() => router.push("/dashboard/admin/reports")}>
-                  Create New User
-                </Button>
+                <Button variant="ghost" onClick={() => router.push("/dashboard/manager")}>Dashboard</Button>
+                <Button variant="ghost" onClick={() => router.push("/dashboard/manager/reports")}>Create New User</Button>
               </>
             )}
 
             {userRole === "HR" && (
-              <Button variant="ghost" onClick={() => router.push("/dashboard/HR-View")}>
-                HR Dashboard
-              </Button>
+              <Button variant="ghost" onClick={() => router.push("/dashboard/HR-View")}>HR Dashboard</Button>
             )}
 
             {userRole === "user" && (
-              <Button variant="ghost" onClick={() => router.push("/dashboard/user")}>
-                Dashboard
-              </Button>
+              <Button variant="ghost" onClick={() => router.push("/dashboard/user")}>Dashboard</Button>
             )}
 
-            <Button variant="outline" onClick={handleLogout}>
-              Logout
-            </Button>
+            <Button variant="outline" onClick={handleLogout}>Logout</Button>
           </nav>
         </div>
       </header>

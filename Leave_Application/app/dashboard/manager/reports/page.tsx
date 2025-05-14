@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useState } from 'react';
 import axios from 'axios';
@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import DashboardLayout from "@/components/dashboard-layout"
 
-export default function AdminCreateUser() {
+export default function ManagerCreateUser() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -33,7 +33,7 @@ export default function AdminCreateUser() {
   };
 
   return (
-    <DashboardLayout userRole="admin">
+    <DashboardLayout userRole="manager">
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">Create New User</h1>
 
@@ -95,7 +95,7 @@ export default function AdminCreateUser() {
                       onChange={handleChange}
                     >
                       <option value="user">User</option>
-                      <option value="admin">Admin</option>
+                      <option value="manager">Manager</option>
                     </select>
                   </div>
 
