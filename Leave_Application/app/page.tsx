@@ -42,19 +42,22 @@ export default function LoginPage() {
       }
   
       const user = await response.json()
-      
+  
       // Redirect based on role
       if (user.role === 'manager') {
         router.push('/dashboard/manager')
-      } else if(user.role === 'user') {
-        router.push('/dashboard/user')
-      } else {
+      } else if (user.role === 'HR') {
         router.push('/dashboard/HR-View')
+      } else if (user.role === 'admin') {
+        router.push('/dashboard/Admin')
+      } else {
+        router.push('/dashboard/user')
       }
     } catch (err) {
       alert('Login failed: ' + err.message)
     }
   }
+  
 
   return (
     <div className="flex min-h-screen flex-col">

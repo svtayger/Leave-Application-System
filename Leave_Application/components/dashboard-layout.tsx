@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { CalendarDays, Moon, Sun } from "lucide-react"
@@ -9,7 +8,7 @@ import { useTheme } from "next-themes"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
-  userRole: "user" | "manager" | "HR" 
+  userRole: "user" | "manager" | "HR" | "admin"
 }
 
 export default function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
@@ -35,6 +34,11 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
             {userRole === "HR" && (
               <span className="ml-2 text-xs bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 px-2 py-0.5 rounded-full">
                 HR
+              </span>
+            )}
+            {userRole === "admin" && (
+              <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 px-2 py-0.5 rounded-full">
+                Admin
               </span>
             )}
           </div>
@@ -63,6 +67,10 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
 
             {userRole === "user" && (
               <Button variant="ghost" onClick={() => router.push("/dashboard/user")}>Dashboard</Button>
+            )}
+
+            {userRole === "admin" && (
+              <Button variant="ghost" onClick={() => router.push("/dashboard/Admin")}>Admin Dashboard</Button>
             )}
 
             <Button variant="outline" onClick={handleLogout}>Logout</Button>

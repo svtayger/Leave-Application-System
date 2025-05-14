@@ -195,6 +195,17 @@ app.post('/api/users', async (req, res) => {
   }
 });
 
+// GET all users
+app.get('/api/users', async (req, res) => {
+  try {
+    const pool = await sql.connect(config)
+    const result = await pool.request().query("SELECT id, name, email, role FROM Employees")
+    res.json(result.recordset)
+  } catch (err) {
+    console.error("Error fetching users:", err)
+    res.status(500).json({ error: "Internal server error" })
+  }
+})
 
 
 
